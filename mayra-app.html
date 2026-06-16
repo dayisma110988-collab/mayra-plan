@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mayra Plan">
+<meta name="theme-color" content="#3D2B1F">
+<title>Mayra's Wellness Plan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, Georgia, serif; background: #FDF6F0; color: #2D2D2D; min-height: 100vh; overscroll-behavior: none; }
+  .header { background: #3D2B1F; padding: 52px 16px 14px; text-align: center; position: sticky; top: 0; z-index: 100; }
+  .header-sub { font-size: 10px; letter-spacing: 3px; color: #E8C9A0; text-transform: uppercase; margin-bottom: 4px; }
+  .header-title { font-size: 20px; font-weight: bold; color: #FDF6F0; }
+  .header-desc { font-size: 11px; color: #C4A882; margin-top: 3px; }
+  .goals-row { display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; background: #2D1F16; scrollbar-width: none; }
+  .goals-row::-webkit-scrollbar { display: none; }
+  .goal-pill { font-size: 10px; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,0.1); color: #E8C9A0; white-space: nowrap; font-weight: bold; }
+  .tabs { display: flex; background: #2D1F16; padding: 6px 10px 8px; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 1; padding: 8px 2px; border-radius: 20px; border: none; cursor: pointer; font-size: 18px; background: transparent; color: #C4A882; min-width: 44px; transition: background 0.2s; }
+  .tab.active { background: #C97B5A; }
+  .day-tabs { display: flex; gap: 6px; padding: 10px 12px 4px; overflow-x: auto; scrollbar-width: none; }
+  .day-tabs::-webkit-scrollbar { display: none; }
+  .day-tab { min-width: 42px; padding: 7px 4px; border-radius: 12px; border: 1.5px solid #EDE0D4; background: #FFF; color: #7A6B5D; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; }
+  .day-tab.active { background: #C97B5A; border-color: #C97B5A; color: #FFF; }
+  .content { padding: 10px 12px 80px; }
+  .card { background: #FFF; border-radius: 16px; padding: 14px; margin-bottom: 10px; border: 1px solid #EDE0D4; box-shadow: 0 1px 5px rgba(0,0,0,0.05); }
+  .card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #7A6B5D; margin-bottom: 3px; }
+  .card-title { font-size: 15px; font-weight: bold; color: #2D2D2D; margin-bottom: 8px; }
+  .card-accent { font-size: 13px; font-weight: bold; color: #C97B5A; margin-bottom: 8px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: #F3E8DC; color: #8B5E3C; font-weight: bold; }
+  ul { padding-left: 16px; }
+  li { font-size: 13px; color: #7A6B5D; margin-bottom: 4px; line-height: 1.5; }
+  .info-box { border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .info-box.green { background: #E8F4EC; border: 1px solid #B8D8BF; }
+  .info-box.peach { background: #FEF3E8; border: 1px solid #F0D5B5; }
+  .info-box.purple { background: #F3E8F4; border: 1px solid #D5B8D8; }
+  .info-box.blue { background: #EAF2FF; border: 1px solid #B8CFF0; }
+  .info-box.pill { background: #F3E8DC; border: 1px solid #EDE0D4; }
+  .info-title { font-size: 12px; font-weight: bold; margin-bottom: 6px; }
+  .info-text { font-size: 12px; line-height: 1.8; }
+  .countdown-box { background: linear-gradient(135deg, #3D2B1F, #6B3D2A); border-radius: 20px; padding: 18px; margin-bottom: 12px; color: #FFF; text-align: center; }
+  .cd-nums { display: flex; justify-content: center; gap: 10px; margin: 12px 0; }
+  .cd-unit { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 8px 10px; min-width: 52px; }
+  .cd-val { font-size: 22px; font-weight: bold; color: #FDF6F0; }
+  .cd-lbl { font-size: 9px; color: #C4A882; margin-top: 1px; }
+  .cd-row { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+  .cd-big { text-align: center; }
+  .cd-big-val { font-size: 18px; font-weight: bold; color: #E8C9A0; }
+  .cd-big-lbl { font-size: 10px; color: #C4A882; }
+  .divider { width: 1px; background: rgba(255,255,255,0.2); }
+  .pr-banner { background: linear-gradient(135deg, #C97B5A, #8B5E3C); border-radius: 16px; padding: 16px; margin-bottom: 14px; color: #FFF; text-align: center; }
+  .run-card { background: #FFF; border-radius: 14px; padding: 12px; margin-bottom: 8px; border: 1px solid #EDE0D4; }
+  .run-card.pr-card { border-color: #C97B5A; box-shadow: 0 0 0 2px rgba(201,123,90,0.15); }
+  .run-stats { display: flex; gap: 14px; margin-top: 8px; }
+  .run-stat-label { font-size: 10px; color: #7A6B5D; }
+  .run-stat-val { font-size: 14px; font-weight: bold; color: #2D2D2D; }
+  .pr-badge { font-size: 10px; background: #C97B5A; color: #FFF; padding: 2px 7px; border-radius: 8px; font-weight: bold; }
+  .add-run-btn { width: 100%; padding: 13px; border-radius: 14px; border: 2px dashed #C97B5A; background: transparent; color: #C97B5A; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; }
+  .input-field { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #EDE0D4; margin-bottom: 8px; font-size: 14px; background: #FDF6F0; color: #2D2D2D; font-family: inherit; }
+  .btn-row { display: flex; gap: 8px; }
+  .btn-primary { flex: 1; padding: 11px; border-radius: 12px; border: none; background: #C97B5A; color: #FFF; font-weight: bold; font-size: 14px; cursor: pointer; }
+  .btn-secondary { flex: 1; padding: 11px; border-radius: 12px; border: 1px solid #EDE0D4; background: transparent; color: #7A6B5D; font-size: 14px; cursor: pointer; }
+  .timeline-item { display: flex; gap: 10px; margin-bottom: 14px; }
+  .timeline-bar { width: 3px; background: #C97B5A; border-radius: 4px; flex-shrink: 0; }
+  .timeline-period { font-size: 10px; color: #7A6B5D; margin-bottom: 2px; }
+  .timeline-label { font-size: 13px; font-weight: bold; color: #2D2D2D; margin-bottom: 4px; }
+  .timeline-item-text { font-size: 12px; color: #7A6B5D; margin-bottom: 2px; }
+  .supp-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+  .supp-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .supp-name { font-size: 13px; font-weight: bold; color: #2D2D2D; }
+  .supp-note { font-size: 11px; color: #7A6B5D; margin-top: 1px; }
+  .supp-goal { font-size: 10px; font-weight: bold; margin-top: 2px; }
+  .week-row { font-size: 12px; line-height: 2; color: #8B5E3C; }
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #3D2B1F; display: flex; padding: 8px 0 20px; border-top: 1px solid #2D1F16; z-index: 200; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; padding: 4px 0; }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 9px; color: #C4A882; font-weight: bold; letter-spacing: 0.5px; }
+  .nav-btn.active .nav-label { color: #C97B5A; }
+  .section-divider { height: 1px; background: #EDE0D4; margin: 8px 0 12px; }
+  .home-workout-badge { background: #E8F4EC; border: 1px solid #B8D8BF; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-sub">Mayra's Complete Protocol</div>
+  <div class="header-title">Gut · Heart · Muscle · Hormones</div>
+  <div class="header-desc">Your Personal Wellness App · Wedding: July 16, 2027</div>
+</div>
+
+<div class="goals-row">
+  <span class="goal-pill">💪 Build Muscle</span>
+  <span class="goal-pill">❤️ Heart Health</span>
+  <span class="goal-pill">🔥 Heal Gut</span>
+  <span class="goal-pill">🥚 Ovarian Support</span>
+  <span class="goal-pill">🌙 9PM Mile</span>
+  <span class="goal-pill">👰 Wedding 2027</span>
+</div>
+
+<div id="app-content"></div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showTab('countdown')" id="nav-countdown">
+    <span class="nav-icon">👰</span>
+    <span class="nav-label">Wedding</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('meals')" id="nav-meals">
+    <span class="nav-icon">🍽</span>
+    <span class="nav-label">Meals</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('workout')" id="nav-workout">
+    <span class="nav-icon">🏋️</span>
+    <span class="nav-label">Workout</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('supplements')" id="nav-supplements">
+    <span class="nav-icon">💊</span>
+    <span class="nav-label">Supps</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('running')" id="nav-running">
+    <span class="nav-icon">🌙</span>
+    <span class="nav-label">Running</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('home')" id="nav-home">
+    <span class="nav-icon">🥊</span>
+    <span class="nav-label">Home</span>
+  </button>
+</nav>
+
+<script>
+const WEDDING = new Date("2027-07-16T00:00:00");
+let currentTab = "countdown";
+let currentDay = "Mon";
+let runLog = JSON.parse(localStorage.getItem("mayra_runs") || '[{"date":"Jun 15","day":"Mon","distance":"1.01","pace":"16:41","time":"16m 57s","note":"First run ever! PR 🏆","pr":true}]');
+let showAddRun = false;
+
+const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+const meals = {
+  Mon: { label:"Monday",
+    breakfast:{title:"High-Protein Pre-Workout Bowl",items:["3 pasture-raised eggs scrambled in ghee","½ cup roasted sweet potato cubes","1 cup sautéed spinach & mushrooms","Sprinkle turmeric + sea salt","🕐 Eat 60–90 min before 8 AM weights"],tags:["💪 Protein","🌿 Anti-inflam"]},
+    lunch:{title:"Salmon & Quinoa Recovery Bowl",items:["5 oz wild salmon (baked)","½ cup cooked quinoa","1 cup steamed broccoli & zucchini","¼ avocado sliced","Dressing: olive oil, lemon, turmeric"],tags:["❤️ Omega-3","💪 Muscle Repair"]},
+    dinner:{title:"Grass-Fed Beef & Veggie Stir-Fry",items:["5 oz grass-fed ground beef","Bok choy, carrots, snap peas","2 garlic cloves, fresh ginger","Coconut aminos sauce","Cauliflower rice — eat before evening yoga"],tags:["💪 Glutamine","🔥 Gut Repair"]},
+    snack:{title:"Post-Workout Snack",items:["1 scoop collagen or protein powder in water","1 banana + 1 tbsp almond butter","Eat within 30–45 min after lifting"]}
+  },
+  Tue: { label:"Tuesday",
+    breakfast:{title:"Gut-Healing Smoothie Bowl",items:["1 cup kefir","½ cup frozen blueberries","1 scoop collagen peptides","1 tbsp ground flaxseed","Toppings: banana, pumpkin seeds, raw honey","🕐 Eat before 6:55 AM — doors lock at 7!"],tags:["🦠 Probiotic","💪 Protein"]},
+    lunch:{title:"Turkey & Avocado Lettuce Wraps",items:["4 oz ground turkey (cumin, garlic)","Butter lettuce cups","½ avocado, diced tomato, cilantro","Fermented salsa or kimchi on side","Squeeze of lime"],tags:["🦠 Probiotic","💪 Lean Protein"]},
+    dinner:{title:"Herb-Roasted Chicken Thighs",items:["6 oz bone-in chicken thigh","Roasted asparagus & Brussels sprouts","1 cup bone broth to sip alongside","Garlic, rosemary, olive oil","Side: small baked potato w/ ghee"],tags:["🔥 Gut Repair","💪 Glutamine"]},
+    snack:{title:"Snack",items:["Walnuts + 1 oz dark chocolate (85%+)","Chamomile or peppermint tea"]}
+  },
+  Wed: { label:"Wednesday",
+    breakfast:{title:"Power Eggs & Sweet Potato",items:["3 eggs in ghee or coconut oil","½ cup roasted sweet potato","Handful of arugula or spinach","Sea salt, black pepper, turmeric","🕐 Done by 8:45 AM for work at 9:30 ✅"],tags:["💪 Protein","🌿 Anti-inflam"]},
+    lunch:{title:"Post-Workout Recovery Plate",items:["5 oz grilled chicken","½ cup brown rice or quinoa","Roasted broccoli + drizzle olive oil","¼ avocado + lemon","🕐 Eat before Zumba at 6:30 PM"],tags:["💪 Muscle Repair","❤️ Heart Health"]},
+    dinner:{title:"Tuna Niçoise Salad",items:["1 can wild-caught tuna in olive oil","Mixed greens, tomatoes, olives","2 soft-boiled eggs + green beans","Dijon, ACV, EVOO dressing","Easy walk tonight — not run 🌙"],tags:["❤️ Omega-3","💪 Protein"]},
+    snack:{title:"Pre-Zumba Snack",items:["Rice cake + almond butter + banana","Electrolyte water or coconut water","🕐 Eat 60 min before 6:30 PM Zumba"]}
+  },
+  Thu: { label:"Thursday",
+    breakfast:{title:"Collagen Bone Broth Porridge",items:["½ cup GF oats cooked in 1 cup bone broth","1 tbsp collagen powder stirred in","Top: cinnamon, sliced pear, pecans","🕐 Eat before 8 AM Barre Express"],tags:["🔥 Gut Repair","💪 Collagen"]},
+    lunch:{title:"Chicken & Roasted Veggie Bowl",items:["5 oz rotisserie chicken","Roasted butternut squash & red onion","Arugula, EVOO + lemon, pumpkin seeds","Squeeze of ACV for digestion"],tags:["💪 Protein","🌿 Anti-inflam"]},
+    dinner:{title:"Grass-Fed Lamb + Minted Salad",items:["2 small grass-fed lamb chops","Fresh mint, cucumber & tomato salad","Roasted garlic cauliflower mash","Drizzle of tahini","🕐 Eat before 6:15 PM Pilates Mat"],tags:["🦠 Zinc","💪 Protein"]},
+    snack:{title:"Snack",items:["Kefir smoothie: kefir + berries + ginger","Handful of macadamia nuts"]}
+  },
+  Fri: { label:"Friday",
+    breakfast:{title:"Veggie Egg Muffins",items:["3 eggs whisked with bell pepper, spinach, onion","Bake in muffin tins 375°F for 20 min","Make 6 — grab 2 each morning","🕐 Eat before 8 AM Total Body Strength"],tags:["💪 Protein","🌿 Anti-inflam"]},
+    lunch:{title:"Sardine & Avocado Toast",items:["2 canned sardines in olive oil","1 slice GF sourdough","½ avocado smashed + radish, capers, lemon","Drizzle EVOO + sea salt"],tags:["❤️ Omega-3","🔥 Gut Repair"]},
+    dinner:{title:"Turmeric Chicken Soup",items:["2 cups bone broth + shredded chicken thigh","Carrots, celery, leeks, garlic","1 tsp turmeric + black pepper","Fresh parsley + lemon","🕐 Eat before 6 PM Slow Flow"],tags:["🔥 Gut Repair","🌿 Anti-inflam"]},
+    snack:{title:"Snack",items:["Cucumber slices + hummus (no seed oils)","Ginger-lemon herbal tea"]}
+  },
+  Sat: { label:"Saturday",
+    breakfast:{title:"Weekend Savory Brunch",items:["2 poached eggs over wilted spinach","2 slices nitrate-free turkey bacon","½ cup sautéed mushrooms w/ garlic","Sliced avocado + tomato + sauerkraut","🕐 Eat before 9:30 AM Vinyasa"],tags:["🦠 Probiotic","💪 Protein"]},
+    lunch:{title:"Mediterranean Mezze Bowl",items:["½ cup chickpeas roasted w/ cumin","Tzatziki (probiotic!)","Tabbouleh + stuffed grape leaves","🕐 Between yoga and 12:30 PM Zumba"],tags:["🦠 Probiotic","🌿 Anti-inflam"]},
+    dinner:{title:"Pan-Seared Salmon + Green Goddess",items:["6 oz wild salmon pan-seared in ghee","Brown rice + roasted zucchini, snap peas","Green goddess: avocado, herbs, lemon","🌙 Best night run after dinner — 9 PM!"],tags:["❤️ Omega-3","💪 Protein"]},
+    snack:{title:"Snack",items:["Coconut yogurt + granola (no seed oils)","Fresh fruit of choice"]}
+  },
+  Sun: { label:"Sunday",
+    breakfast:{title:"Gut-Healing Pancakes (Sleep In!)",items:["1 banana + 2 eggs + 1 tbsp collagen","Cook in coconut oil, low heat","Top: fresh berries + raw honey","Side: 1 cup bone broth"],tags:["🔥 Gut Repair","💪 Collagen"]},
+    lunch:{title:"Turkey Chili (Batch Cook!)",items:["Ground turkey, kidney + black beans","Diced tomatoes, peppers, onion, garlic","Top: avocado, cilantro, lime","Makes lunches for Mon + Tue!"],tags:["💪 Protein","🌿 Anti-inflam"]},
+    dinner:{title:"Herb Roasted Chicken + Root Veggies",items:["Whole roasted chicken (save for broth!)","Roasted parsnips, turnips, carrots","Rosemary, thyme, lemon zest","ACV side salad · Shred leftovers for week"],tags:["💪 Glutamine","🔥 Gut Repair"]},
+    snack:{title:"Meal Prep Sunday 🗓",items:["Prep egg muffins for the week","Batch cook proteins","Make bone broth","Early to bed — Monday 8 AM weights!"]}
+  }
+};
+
+const workouts = {
+  Mon:{type:"🏋️ Weights + 🧘 Yoga",sessions:[
+    {label:"🏋️ 8:00 AM Upper Body Strength · Lumi Palevic · Club Room",items:["Arm circles + band pull-aparts warm-up","Dumbbell chest press: 4×10","Bent-over dumbbell rows: 4×10","Shoulder press: 3×10","Bicep curls: 3×12","Tricep overhead extension: 3×12","Core: plank 3×45 sec + dead bugs 3×10"]},
+    {label:"🧘 6:30 PM Vinyasa Open Level · Jeannette · Lavender Room",items:["Stretches chest, shoulders, lats from morning weights","Lowers cortisol before sleep — gut heals overnight","Night mile optional — body already did a lot"]},
+    {label:"🌙 9:00 PM Night Mile (optional tonight)",items:["Slow conversational pace — Queens neighborhood","Track on Strava · ≈ 2,000 steps","Optional Monday — weights + yoga is enough"]}
+  ],why:"Upper body strength builds arms and back. Evening Vinyasa stretches exactly what you worked and drops cortisol so your gut repairs overnight."},
+  Tue:{type:"🧘 Yoga AM + optional PM",sessions:[
+    {label:"🧘 7:00 AM Vinyasa Open Level · Connor · Lavender Room",items:["⚠️ Doors lock 5 min before — arrive by 6:55 AM!","Active recovery after Monday's double session","Cortisol-lowering, gut-healing movement"]},
+    {label:"🧘 6:30 PM — Rotate (choose one)",items:["MOST WEEKS: Vinyasa Open Level (Donna MG, 75 min)","1–2× PER MONTH: Pilates Mat for waist definition","If doing evening class: skip night mile","If skipping evening class: do 9 PM mile instead"]},
+    {label:"🌙 9:00 PM Night Mile (if no evening class)",items:["Slow conversational pace","Track on Strava · ≈ 2,000 steps","Skip if doing both AM + PM yoga"]}
+  ],why:"Tuesday is active recovery. Yoga lowers cortisol — the biggest driver of leaky gut and belly fat. Rotating Pilates targets the waist definition for your wedding."},
+  Wed:{type:"🏋️ Weights + 💃 Zumba",sessions:[
+    {label:"🏋️ 8:00 AM Lower Body Strength · Lumi Palevic · Club Room",items:["Done by 8:45 AM — work by 9:30 AM ✅","Squats 4×10 (go heavy!) · Romanian deadlifts 4×10","Reverse lunges 3×10 each · Glute bridges 3×15","Lateral band walks 3×12 · Calf raises 3×20"]},
+    {label:"💃 6:30 PM Zumba · Will Negrillo · Studio 1",items:["9+ hours after weights — fully recovered","Heart health cardio + belly fat burning","Coconut water before class"]},
+    {label:"🌙 9:00 PM Easy Walk Only (no run tonight)",items:["Gentle 15–20 min stroll — big day today","Still adds ≈ 2,000 steps","Early to bed — Thursday 8 AM Barre tomorrow"]}
+  ],why:"Your biggest day. Legs are your largest muscle group — building them boosts metabolism most. Zumba adds heart health cardio without competing with muscle growth."},
+  Thu:{type:"🩰 Barre + 🧘 Pilates",sessions:[
+    {label:"🩰 8:00 AM Barre Express · Jenn S. · Sun Room",items:["Plié series, relevés, arabesque pulses","Pelvic floor work — directly supports UTI healing","Low cortisol — perfect after Wednesday big day"]},
+    {label:"🧘 6:15 PM Pilates Mat · Tanya · Sun Room",items:["The Hundred, Roll-Up, Single Leg Stretch","Deep core and waist definition work","Pelvic floor + spine alignment"]},
+    {label:"🌙 9:00 PM Night Mile",items:["Slow conversational pace","Track on Strava","5 min stretch after — calves, hip flexors"]}
+  ],why:"Barre + Pilates is your softest day. Pelvic floor healing, posture transformation, waist definition, and full gut repair overnight."},
+  Fri:{type:"🏋️ Weights + 🧘 Restore",sessions:[
+    {label:"🏋️ 8:00 AM Total Body Strength · Lumi Palevic · Club Room",items:["Deadlifts 4×8 · Push-ups to failure 3 sets","Goblet squats 3×12 · Single-arm row 3×10 each","Lateral raises 3×12","Russian twists 3×15 + hollow holds 3×20 sec"]},
+    {label:"🧘 6:00 PM Slow Flow & Restore · Masako · Lavender Room",items:["Best end-of-week restoration class","Deeply calms nervous system","Prepares body for Saturday Vinyasa + Zumba"]},
+    {label:"🌙 9:00 PM Mile OR 💃 Peruvian Dance (occasional)",items:["OPTION A: Night mile after dinner","OPTION B: Peruvian dance 7:30 PM (skip mile if dancing)","Slow Flow ends 7 PM — 30 min to get to dance"]}
+  ],why:"Friday completes your 3-strength-day week. Slow Flow winds down your nervous system. One of the best gut-healing sessions of the week."},
+  Sat:{type:"🧘 Yoga + 💃 Zumba",sessions:[
+    {label:"🧘 9:30 AM Vinyasa Open Level · Lavender Room",items:["Non-negotiable Saturday anchor — every week","Lowers cortisol, opens hips, pelvic floor healing","Most rested day — body primed after Friday restore"]},
+    {label:"💃 12:30 PM Zumba · Studio 1",items:["3 hour gap after yoga — fully recovered","Heart health + belly fat burning + joy","Once a month: swap for 11:30 AM Barre Fit"]},
+    {label:"🌙 9:00 PM Best Night Run — Aim for PR! 🏆",items:["Most rested legs of the week","Target: beat your 16:41/mi PR","Track on Strava every Saturday","Celebrate every second you drop 🎉"]}
+  ],why:"Saturday is your most balanced day. Yoga opens the body, Zumba energizes it, and the 9 PM run is your best PR opportunity of the week."},
+  Sun:{type:"🛌 Full Rest",sessions:[
+    {label:"🛌 Full Rest — No Structured Exercise",items:["Sleep in — non-negotiable, not optional","Muscles grow during rest, not during workouts","Gut lining repairs fastest during deep sleep","Foam rolling only if sore (10 min max)"]},
+    {label:"🗓 Meal Prep for the Week",items:["Batch cook proteins: chicken, turkey, eggs","Prep egg muffins for weekday breakfasts","Make bone broth from chicken carcass","Early to bed — Monday 8 AM weights tomorrow"]}
+  ],why:"Sunday rest is as important as any workout. 6 active days means your body needs one full day to repair and grow."}
+};
+
+const supplements = [
+  {time:"Morning (with breakfast)",color:"#FEF3E8",border:"#F0D5B5",dot:"#8B5E3C",items:[
+    {name:"Omega-3 (high dose)",note:"With food",goal:"❤️ Cholesterol + 🥚 Ovaries"},
+    {name:"Vitamin D3",note:"With fatty meal for absorption",goal:"🦴 Immune + 🥚 Ovaries"},
+    {name:"Methyl Guard (Methylated B vitamins)",note:"With food",goal:"🧬 MTHFR Gene + ❤️ Heart"},
+    {name:"CoQ10 Ubiquinol 200–400mg",note:"With breakfast — fat-soluble",goal:"🥚 Ovarian Reserve + ❤️ Heart"}
+  ]},
+  {time:"Mid-Morning (30 min before/between meals)",color:"#E8F4EC",border:"#B8D8BF",dot:"#3D6B4A",items:[
+    {name:"L-Glutamine 5–10g",note:"Stir in water on empty stomach",goal:"🔥 Gut Lining Repair"},
+    {name:"Electrolytes (workout days only)",note:"Especially Wednesday between weights & Zumba",goal:"💪 Performance + Hydration"}
+  ]},
+  {time:"Evening (with dinner or before bed)",color:"#F3E8F4",border:"#D5B8D8",dot:"#6B3D7A",items:[
+    {name:"Immunocal (1 sachet)",note:"COOL water ONLY — heat destroys it",goal:"🛡️ Glutathione + Immune + Gut"},
+    {name:"Magnesium Glycinate 300–400mg",note:"Before bed — sleep + gut motility",goal:"😴 Sleep + 🔥 Gut"},
+    {name:"Collagen Peptides 10–15g",note:"Stir into chamomile tea or bone broth",goal:"🔥 Gut Lining + 💪 Muscle"},
+    {name:"L-Theanine 200mg",note:"If stress is high — calms nervous system",goal:"😴 Cortisol + Gut Healing"}
+  ]}
+];
+
+const homeWorkouts = {
+  Mon:{gymClass:"Replaces: Upper Body Strength — Lumi Palevic",sections:[
+    {label:"🔥 Warm-Up (5 min)",items:["Arm circles forward + backward: 30 sec each","Band pull-aparts: 15 reps","Shoulder rolls: 10 each direction","Light shadowboxing on bag: 1 min"]},
+    {label:"🔗 Pull Machine (back + biceps)",items:["Seated cable rows: 4×10 heavy","Single-arm pull: 3×10 each arm","Face pulls: 3×12"]},
+    {label:"💪 Dumbbells (chest + shoulders + arms)",items:["Floor chest press: 4×10","Shoulder press: 3×10","Lateral raises: 3×12","Bicep curls: 3×12","Tricep overhead extension: 3×12"]},
+    {label:"🥊 Boxing Bag (3 rounds)",items:["Round 1: Jab-cross combos × 2 min","Round 2: Uppercuts + hooks × 2 min","Round 3: Full combo + body shots × 2 min","Rest 45 sec between rounds"]},
+    {label:"🧘 Core Finisher",items:["Plank: 3×45 sec","Dead bugs: 3×10 each side"]}
+  ],tip:"The boxing bag sculpts arms faster than any machine. 3 rounds after weights = your secret weapon."},
+  Wed:{gymClass:"Replaces: Lower Body Strength — Lumi Palevic",sections:[
+    {label:"🔥 Warm-Up (5 min)",items:["Leg swings front + side: 10 each","Bodyweight squats: 15 slow reps","Hip circles: 10 each direction"]},
+    {label:"🦵 Dumbbell Lower Body",items:["Dumbbell squats (heavy): 4×10","Romanian deadlifts: 4×10","Reverse lunges: 3×10 each leg","Glute bridges with dumbbell: 3×15","Sumo squats: 3×12","Calf raises: 3×20"]},
+    {label:"🔗 Pull Machine (glute + hamstring)",items:["Cable pull-throughs: 3×12","Standing cable kickbacks: 3×15 each leg","Lateral cable walks: 3×12 each"]},
+    {label:"🥊 Boxing Bag (HIIT finisher)",items:["Round 1: Low kicks + jabs × 2 min","Round 2: Fast footwork + combos × 2 min","Burns belly fat — your cardio finisher"]},
+    {label:"🧘 Stretch (5 min)",items:["Hip flexor: 45 sec each","Hamstring: 45 sec each","Glute figure-4: 45 sec each"]}
+  ],tip:"Go slow on the way down (3 seconds). Slow eccentric builds maximum muscle with dumbbells alone."},
+  Fri:{gymClass:"Replaces: Total Body Strength — Lumi Palevic",sections:[
+    {label:"🔥 Warm-Up (5 min)",items:["Jump rope or high knees: 2 min","Arm circles + leg swings: 1 min each","Light shadowboxing: 1 min"]},
+    {label:"🔗 Pull Machine (compound pulling)",items:["Deadlift rows: 4×8 heavy","Single-arm rows: 3×10 each","Face pulls: 3×12"]},
+    {label:"💪 Dumbbells (full body)",items:["Push-ups to failure: 3 sets","Goblet squats: 3×12","Dumbbell thrusters (squat+press): 3×10","Lateral raises: 3×12","Renegade rows: 3×8 each"]},
+    {label:"🥊 Boxing Bag (4 power rounds)",items:["Round 1: Power jab-cross-hook × 2 min","Round 2: Bodywork + uppercuts × 2 min","Round 3: All-out sprint combos × 90 sec","Round 4: Cool-down light jabs × 1 min"]},
+    {label:"🧘 Core Finisher",items:["Russian twists: 3×15","Hollow body holds: 3×20 sec","Dead bugs: 3×10 each"]}
+  ],tip:"Friday boxing is your most powerful session. After two strength days your body is primed — 4 rounds will leave you stronger than any class."}
+};
+
+const homeDays = ["Mon","Wed","Fri"];
+let homeDay = "Mon";
+
+function pad(n){return String(n).padStart(2,"0");}
+
+function getCountdown(){
+  const now = new Date();
+  const diff = WEDDING - now;
+  if(diff<=0)return{done:true};
+  const d = Math.floor(diff/(1000*60*60*24));
+  const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+  const m = Math.floor((diff%(1000*60*60))/(1000*60));
+  const s = Math.floor((diff%(1000*60))/1000);
+  return{days:d,hours:h,minutes:m,seconds:s,months:Math.floor(d/30),weeks:Math.floor(d/7)};
+}
+
+function mealCard(m){
+  const icons={breakfast:"🌅 Breakfast",lunch:"☀️ Lunch",dinner:"🌙 Dinner",snack:"🍎 Snack"};
+  return ['breakfast','lunch','dinner','snack'].map(k=>{
+    const meal=m[k];
+    const tags=meal.tags?`<div class="tags">${meal.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:'';
+    return`<div class="card"><div class="card-label">${icons[k]}</div><div class="card-title">${meal.title}</div>${tags}<ul>${meal.items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  }).join('');
+}
+
+function renderCountdown(){
+  const cd=getCountdown();
+  return`
+  <div class="content">
+    <div class="countdown-box">
+      <div style="font-size:28px">👰</div>
+      <div style="font-size:10px;letter-spacing:3px;color:#E8C9A0;text-transform:uppercase;margin:6px 0 2px">Wedding Countdown</div>
+      <div style="font-size:12px;color:#C4A882;margin-bottom:14px">July 16, 2027 · Somerley at Fox Hollow</div>
+      <div class="cd-nums">
+        <div class="cd-unit"><div class="cd-val" id="cd-days">${pad(cd.days)}</div><div class="cd-lbl">Days</div></div>
+        <div class="cd-unit"><div class="cd-val" id="cd-hours">${pad(cd.hours)}</div><div class="cd-lbl">Hours</div></div>
+        <div class="cd-unit"><div class="cd-val" id="cd-mins">${pad(cd.minutes)}</div><div class="cd-lbl">Min</div></div>
+        <div class="cd-unit"><div class="cd-val" id="cd-secs">${pad(cd.seconds)}</div><div class="cd-lbl">Sec</div></div>
+      </div>
+      <div class="cd-row">
+        <div class="cd-big"><div class="cd-big-val">${cd.months}</div><div class="cd-big-lbl">Months</div></div>
+        <div class="divider"></div>
+        <div class="cd-big"><div class="cd-big-val">${cd.weeks}</div><div class="cd-big-lbl">Weeks</div></div>
+        <div class="divider"></div>
+        <div class="cd-big"><div class="cd-big-val">${cd.days}</div><div class="cd-big-lbl">Days</div></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:#E8C9A0;font-style:italic">Every workout brings you closer 💛</div>
+    </div>
+    <div class="card">
+      <div class="card-accent">📅 Your Transformation Timeline</div>
+      ${[
+        {p:"Now → Aug 2026",l:"Foundation",items:["Strength improving weekly","Gut inflammation reducing","Energy rising","Night mile pace dropping"]},
+        {p:"Sep → Oct 2026",l:"Definition",items:["Visible arm + shoulder muscle","Belly visibly flatter","Posture transforming","Cholesterol improving"]},
+        {p:"Nov → Dec 2026",l:"Recomposition",items:["Body shape changing clearly","Clothes fitting differently","Running pace sub-14:00/mi","Gut largely healed"]},
+        {p:"Jan → Mar 2027",l:"Wedding Body",items:["Arms sculpted, waist defined","Posture elegant for photos","Dress fittings feel incredible","Best health of your life"]},
+        {p:"Apr → Jul 2027",l:"Refinement + Glow",items:["Maintain and shine","Skin radiant from supplements","Final dress fittings","You are ready 💛"]}
+      ].map(ph=>`
+        <div class="timeline-item">
+          <div class="timeline-bar"></div>
+          <div>
+            <div class="timeline-period">${ph.p}</div>
+            <div class="timeline-label">${ph.l}</div>
+            ${ph.items.map(i=>`<div class="timeline-item-text">• ${i}</div>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="info-box green">
+      <div class="info-title" style="color:#3D6B4A">🌴 Punta Cana Checkpoint — July 4 Week 2026</div>
+      <div class="info-text" style="color:#3D6B4A">Your halfway victory lap. One full year of this protocol before your wedding. You will feel genuinely confident in a bikini at TRS Turquesa. 💛</div>
+    </div>
+    <div class="info-box pill">
+      <div class="info-title" style="color:#8B5E3C">💡 The One Rule That Changes Everything</div>
+      <div class="info-text" style="color:#8B5E3C">Consistency over perfection. Missing one class won't matter. Missing three weeks will. Your plan is sustainable for 13 months — show up most days and July 16, 2027 will be everything.</div>
+    </div>
+  </div>`;
+}
+
+function renderMeals(){
+  const d=meals[currentDay];
+  const daytabs=days.map(dy=>`<button class="day-tab ${dy===currentDay?'active':''}" onclick="setDay('${dy}')">${dy}</button>`).join('');
+  return`
+  <div class="day-tabs">${daytabs}</div>
+  <div class="content">
+    <div style="font-size:17px;font-weight:bold;color:#C97B5A;margin-bottom:10px">${d.label}</div>
+    ${mealCard(d)}
+    <div class="info-box green">
+      <div class="info-title" style="color:#3D6B4A">💧 Daily Non-Negotiables</div>
+      <div class="info-text" style="color:#3D6B4A">• 8–10 glasses water · 1 cup bone broth<br>• Herbal teas: ginger, chamomile, peppermint<br>• No gluten, seed oils, alcohol, processed sugar<br>• Protein at every meal<br>• 🌙 Night mile at 9 PM every night</div>
+    </div>
+  </div>`;
+}
+
+function renderWorkout(){
+  const w=workouts[currentDay];
+  const daytabs=days.map(dy=>`<button class="day-tab ${dy===currentDay?'active':''}" onclick="setDay('${dy}')">${dy}</button>`).join('');
+  return`
+  <div class="day-tabs">${daytabs}</div>
+  <div class="content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:17px;font-weight:bold;color:#C97B5A">${days.find(d=>d===currentDay)}'s Plan</div>
+      <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:#C97B5A;color:#FFF;font-weight:bold">${w.type}</span>
+    </div>
+    ${w.sessions.map(s=>`
+      <div class="card">
+        <div class="card-accent">${s.label}</div>
+        <ul>${s.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+      </div>
+    `).join('')}
+    <div class="info-box pill">
+      <div class="info-title" style="color:#8B5E3C">✨ Why this works for you</div>
+      <div class="info-text" style="color:#8B5E3C">${w.why}</div>
+    </div>
+    <div class="info-box peach">
+      <div class="info-title" style="color:#8B5E3C">📅 Full Week</div>
+      <div class="week-row">
+        <b>Mon</b> 8AM Weights 🏋️ · 6:30PM Vinyasa 🧘 · 9PM mile 🌙<br>
+        <b>Tue</b> 7AM Vinyasa 🧘 · 6:30PM Vinyasa/Pilates · 9PM mile 🌙<br>
+        <b>Wed</b> 8AM Weights 🏋️ · 6:30PM Zumba 💃 · 9PM walk 🌙<br>
+        <b>Thu</b> 8AM Barre 🩰 · 6:15PM Pilates 🧘 · 9PM mile 🌙<br>
+        <b>Fri</b> 8AM Weights 🏋️ · 6PM Slow Flow 🧘 · 9PM mile 🌙<br>
+        <b>Sat</b> 9:30AM Vinyasa 🧘 · 12:30PM Zumba 💃 · 9PM PR run 🌙<br>
+        <b>Sun</b> Sleep In · Rest · Meal Prep 🛌
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSupplements(){
+  return`<div class="content">
+    <div style="font-size:17px;font-weight:bold;color:#C97B5A;margin-bottom:4px">Daily Supplement Protocol</div>
+    <div style="font-size:12px;color:#7A6B5D;margin-bottom:12px">Gut · Heart · Muscle · Ovarian Reserve · Cholesterol</div>
+    ${supplements.map(s=>`
+      <div style="background:${s.color};border-radius:16px;padding:14px;margin-bottom:10px;border:1px solid ${s.border}">
+        <div style="font-size:12px;font-weight:bold;color:${s.dot};margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid ${s.border}">⏰ ${s.time}</div>
+        ${s.items.map(item=>`
+          <div class="supp-item">
+            <div class="supp-dot" style="background:${s.dot}"></div>
+            <div>
+              <div class="supp-name">${item.name}</div>
+              <div class="supp-note">${item.note}</div>
+              <div class="supp-goal" style="color:${s.dot}">${item.goal}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+    <div class="info-box blue">
+      <div class="info-title" style="color:#2D5A9E">⚠️ Key Rules</div>
+      <div class="info-text" style="color:#2D5A9E">• <b>Always confirm doses with your doctor</b><br>• CoQ10 + Omega-3 + D3: always with food<br>• Immunocal: cool water ONLY — heat destroys it<br>• L-Glutamine: away from protein meals<br>• Give each supplement 4–6 weeks minimum</div>
+    </div>
+  </div>`;
+}
+
+function paceToParts(pace){const p=pace.split(":");return parseInt(p[0])*60+parseInt(p[1]);}
+
+function renderRunning(){
+  const pr=runLog.find(r=>r.pr);
+  const addForm=showAddRun?`
+    <div class="card">
+      <div class="card-accent">Log a Run</div>
+      <input class="input-field" id="run-date" placeholder="Date (e.g. Jun 22)">
+      <input class="input-field" id="run-pace" placeholder="Pace (e.g. 16:20)">
+      <input class="input-field" id="run-time" placeholder="Time (e.g. 16m 30s)">
+      <input class="input-field" id="run-note" placeholder="Note (optional)">
+      <div class="btn-row">
+        <button class="btn-primary" onclick="saveRun()">Save Run</button>
+        <button class="btn-secondary" onclick="cancelRun()">Cancel</button>
+      </div>
+    </div>
+  `:`<button class="add-run-btn" onclick="startAddRun()">+ Log Tonight's Run</button>`;
+  return`<div class="content">
+    <div class="pr-banner">
+      <div style="font-size:24px">🏆</div>
+      <div style="font-size:15px;font-weight:bold;margin-top:4px">Current PR</div>
+      <div style="font-size:30px;font-weight:bold;margin-top:4px">${pr?pr.pace:'-:--'} /mi</div>
+      <div style="font-size:12px;color:#F3E8DC;margin-top:4px">${pr?pr.distance+' mi · '+pr.date+' · Queens, NY':''}</div>
+      <div style="font-size:11px;color:#E8C9A0;margin-top:4px">"First run down!" · 8 Strava achievements 🎉</div>
+    </div>
+    <div class="info-box green">
+      <div class="info-title" style="color:#3D6B4A">🎯 Pace Goals Over Time</div>
+      <div class="info-text" style="color:#3D6B4A"><b>Now:</b> 16:41/mi — perfect Zone 1-2<br><b>Month 1:</b> 15:30–16:00/mi<br><b>Month 2:</b> 14:30–15:00/mi<br><b>Month 3:</b> sub-14:00/mi<br><b>Best PR night:</b> Saturday 9 PM 🌙</div>
+    </div>
+    <div style="font-size:14px;font-weight:bold;color:#C97B5A;margin-bottom:8px">📋 Run Log</div>
+    ${runLog.map(run=>`
+      <div class="run-card ${run.pr?'pr-card':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:bold">${run.date}${run.day?' · '+run.day:''}</div>
+            <div style="font-size:11px;color:#7A6B5D;margin-top:2px">${run.note||''}</div>
+          </div>
+          ${run.pr?'<span class="pr-badge">PR 🏆</span>':''}
+        </div>
+        <div class="run-stats">
+          <div><div class="run-stat-label">Distance</div><div class="run-stat-val">${run.distance} mi</div></div>
+          <div><div class="run-stat-label">Pace</div><div class="run-stat-val">${run.pace}/mi</div></div>
+          ${run.time?`<div><div class="run-stat-label">Time</div><div class="run-stat-val">${run.time}</div></div>`:''}
+        </div>
+      </div>
+    `).join('')}
+    ${addForm}
+    <div class="info-box peach" style="margin-top:12px">
+      <div class="info-title" style="color:#8B5E3C">🌙 Night Mile Rules</div>
+      <div class="info-text" style="color:#8B5E3C">• <b>9:00 PM every night</b> — your daily ritual<br>• Conversational pace always<br>• <b>Wednesday</b>: easy walk only<br>• <b>Monday</b>: optional (big day already)<br>• <b>Friday</b>: skip if Peruvian dance<br>• <b>Saturday 9 PM</b>: best PR attempt<br>• <b>Sunday</b>: optional gentle walk<br>• Track every run on Strava 📱</div>
+    </div>
+  </div>`;
+}
+
+function renderHome(){
+  const w=homeWorkouts[homeDay];
+  const daytabs=homeDays.map(d=>`<button class="day-tab ${d===homeDay?'active':''}" onclick="setHomeDay('${d}')">${d}</button>`).join('');
+  return`
+  <div class="day-tabs" style="padding-top:12px">${daytabs}</div>
+  <div class="content">
+    <div class="home-workout-badge">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#3D6B4A;margin-bottom:2px">🏠 Home Alternative</div>
+      <div style="font-size:13px;font-weight:bold;color:#2D2D2D">${w.gymClass}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      ${["🏋️ Dumbbells","🔗 Pull Machine","🥊 Boxing Bag"].map(e=>`<span class="tag" style="font-size:11px">${e}</span>`).join('')}
+    </div>
+    ${w.sections.map(s=>`
+      <div class="card">
+        <div class="card-accent">${s.label}</div>
+        <ul>${s.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+      </div>
+    `).join('')}
+    <div class="info-box pill">
+      <div class="info-title" style="color:#8B5E3C">🥊 Home Gym Advantage</div>
+      <div class="info-text" style="color:#8B5E3C">${w.tip}</div>
+    </div>
+    <div class="info-box green">
+      <div class="info-title" style="color:#3D6B4A">📋 Home Workout Rules</div>
+      <div class="info-text" style="color:#3D6B4A">• Still start at 8 AM — keep time discipline<br>• Add weight every 3–4 weeks<br>• 3 sec slow on the way down = more muscle<br>• Boxing bag = your cardio finisher every day<br>• Still do your evening class after<br>• Track weights used to beat them next time</div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  let html='';
+  if(currentTab==='countdown') html=renderCountdown();
+  else if(currentTab==='meals') html=renderMeals();
+  else if(currentTab==='workout') html=renderWorkout();
+  else if(currentTab==='supplements') html=renderSupplements();
+  else if(currentTab==='running') html=renderRunning();
+  else if(currentTab==='home') html=renderHome();
+  document.getElementById('app-content').innerHTML=html;
+  startClock();
+}
+
+let clockInterval=null;
+function startClock(){
+  if(clockInterval)clearInterval(clockInterval);
+  if(currentTab!=='countdown')return;
+  clockInterval=setInterval(()=>{
+    const cd=getCountdown();
+    const ds=document.getElementById('cd-days');
+    const hs=document.getElementById('cd-hours');
+    const ms=document.getElementById('cd-mins');
+    const ss=document.getElementById('cd-secs');
+    if(ds)ds.textContent=pad(cd.days);
+    if(hs)hs.textContent=pad(cd.hours);
+    if(ms)ms.textContent=pad(cd.minutes);
+    if(ss)ss.textContent=pad(cd.seconds);
+  },1000);
+}
+
+function showTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-'+tab)?.classList.add('active');
+  showAddRun=false;
+  render();
+  window.scrollTo(0,0);
+}
+
+function setDay(d){currentDay=d;render();}
+function setHomeDay(d){homeDay=d;render();}
+
+function startAddRun(){showAddRun=true;render();}
+function cancelRun(){showAddRun=false;render();}
+
+function saveRun(){
+  const date=document.getElementById('run-date')?.value;
+  const pace=document.getElementById('run-pace')?.value;
+  const time=document.getElementById('run-time')?.value;
+  const note=document.getElementById('run-note')?.value;
+  if(!date||!pace)return;
+  const newRun={date,pace,time,note,distance:"1.01",pr:false};
+  const updated=[...runLog,newRun];
+  const paces=updated.map(r=>paceToParts(r.pace));
+  const minPace=Math.min(...paces);
+  if(paceToParts(pace)===minPace){
+    updated.forEach(r=>r.pr=false);
+    updated[updated.length-1].pr=true;
+  }
+  runLog=updated;
+  localStorage.setItem("mayra_runs",JSON.stringify(runLog));
+  showAddRun=false;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
