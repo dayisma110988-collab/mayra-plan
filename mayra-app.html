@@ -129,6 +129,10 @@
     <span class="nav-icon">🥊</span>
     <span class="nav-label">Home</span>
   </button>
+  <button class="nav-btn" onclick="showTab('checklist')" id="nav-checklist">
+    <span class="nav-icon">✅</span>
+    <span class="nav-label">Daily</span>
+  </button>
 </nav>
 
 <script>
@@ -511,6 +515,7 @@ function render(){
   else if(currentTab==='supplements') html=renderSupplements();
   else if(currentTab==='running') html=renderRunning();
   else if(currentTab==='home') html=renderHome();
+  else if(currentTab==='checklist') html=renderChecklist();
   document.getElementById('app-content').innerHTML=html;
   startClock();
 }
@@ -565,6 +570,156 @@ function saveRun(){
   localStorage.setItem("mayra_runs",JSON.stringify(runLog));
   showAddRun=false;
   render();
+}
+
+
+const CHECKLIST_ITEMS = {
+  morning: [
+    {id:"m1", text:"Take Omega-3 with breakfast", icon:"❤️"},
+    {id:"m2", text:"Take Vitamin D3 with fatty meal", icon:"🦴"},
+    {id:"m3", text:"Take Methyl Guard", icon:"🧬"},
+    {id:"m4", text:"Take CoQ10 Ubiquinol", icon:"🥚"},
+    {id:"m5", text:"Drink 1 glass water before coffee", icon:"💧"},
+    {id:"m6", text:"Eat protein-rich breakfast", icon:"🥚"},
+  ],
+  midday: [
+    {id:"d1", text:"L-Glutamine in water (empty stomach)", icon:"🔥"},
+    {id:"d2", text:"Drink 2+ glasses water", icon:"💧"},
+    {id:"d3", text:"Eat lunch with protein", icon:"🍗"},
+    {id:"d4", text:"Electrolytes (workout days only)", icon:"⚡"},
+  ],
+  evening: [
+    {id:"e1", text:"Immunocal in cool water", icon:"🛡️"},
+    {id:"e2", text:"Magnesium Glycinate before bed", icon:"😴"},
+    {id:"e3", text:"Collagen in chamomile tea or broth", icon:"🔥"},
+    {id:"e4", text:"L-Theanine if stressed", icon:"🧘"},
+    {id:"e5", text:"1 cup bone broth today", icon:"🍵"},
+  ],
+  fitness: [
+    {id:"f1", text:"Morning class or home workout", icon:"🏋️"},
+    {id:"f2", text:"Evening class", icon:"🧘"},
+    {id:"f3", text:"9 PM night mile or walk", icon:"🌙"},
+    {id:"f4", text:"Track run on Strava", icon:"📱"},
+  ],
+  nutrition: [
+    {id:"n1", text:"No gluten today", icon:"🚫"},
+    {id:"n2", text:"No seed oils today", icon:"🚫"},
+    {id:"n3", text:"No processed sugar today", icon:"🚫"},
+    {id:"n4", text:"8+ glasses water today", icon:"💧"},
+    {id:"n5", text:"Protein at every meal", icon:"💪"},
+    {id:"n6", text:"Dinner 1–2 hrs before evening class", icon:"🕐"},
+  ],
+  wellness: [
+    {id:"w1", text:"8 hrs sleep last night", icon:"😴"},
+    {id:"w2", text:"No alcohol today", icon:"🚫"},
+    {id:"w3", text:"Stress level manageable", icon:"🧘"},
+    {id:"w4", text:"Grateful moment today", icon:"💛"},
+  ]
+};
+
+function getTodayKey(){
+  const d=new Date();
+  return d.toISOString().split('T')[0];
+}
+
+function getChecked(){
+  const key='mayra_checks_'+getTodayKey();
+  return JSON.parse(localStorage.getItem(key)||'{}');
+}
+
+function toggleCheck(id){
+  const key='mayra_checks_'+getTodayKey();
+  const checks=getChecked();
+  checks[id]=!checks[id];
+  localStorage.setItem(key,JSON.stringify(checks));
+  render();
+}
+
+function getStreak(){
+  let streak=0;
+  const today=new Date();
+  for(let i=1;i<=30;i++){
+    const d=new Date(today);
+    d.setDate(d.getDate()-i);
+    const key='mayra_checks_'+d.toISOString().split('T')[0];
+    const checks=JSON.parse(localStorage.getItem(key)||'{}');
+    const total=Object.keys(CHECKLIST_ITEMS).reduce((a,k)=>a+CHECKLIST_ITEMS[k].length,0);
+    const done=Object.values(checks).filter(Boolean).length;
+    if(done>=Math.floor(total*0.7)) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function renderChecklist(){
+  const checks=getChecked();
+  const allItems=Object.values(CHECKLIST_ITEMS).flat();
+  const total=allItems.length;
+  const done=allItems.filter(item=>checks[item.id]).length;
+  const pct=Math.round((done/total)*100);
+  const streak=getStreak();
+  const today=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const daysToWedding=Math.ceil((WEDDING-new Date())/(1000*60*60*24));
+
+  const sections=[
+    {key:'morning',label:'🌅 Morning Supplements & Food',color:'#FEF3E8',border:'#F0D5B5',dot:'#8B5E3C'},
+    {key:'midday',label:'☀️ Midday',color:'#E8F4EC',border:'#B8D8BF',dot:'#3D6B4A'},
+    {key:'evening',label:'🌙 Evening Supplements',color:'#F3E8F4',border:'#D5B8D8',dot:'#6B3D7A'},
+    {key:'fitness',label:'🏋️ Fitness',color:'#FEF3E8',border:'#F0D5B5',dot:'#C97B5A'},
+    {key:'nutrition',label:'🥗 Nutrition Rules',color:'#E8F4EC',border:'#B8D8BF',dot:'#3D6B4A'},
+    {key:'wellness',label:'💛 Wellness',color:'#EAF2FF',border:'#B8CFF0',dot:'#2D5A9E'},
+  ];
+
+  return`<div class="content">
+    <div style="text-align:center;margin-bottom:14px">
+      <div style="font-size:12px;color:#7A6B5D;margin-bottom:4px">${today}</div>
+      <div style="font-size:11px;color:#C97B5A;font-weight:bold">${daysToWedding} days to your wedding 👰</div>
+    </div>
+
+    <!-- Progress Ring -->
+    <div style="background:#3D2B1F;border-radius:20px;padding:16px;margin-bottom:14px;text-align:center;color:#FFF">
+      <div style="font-size:11px;letter-spacing:2px;color:#E8C9A0;text-transform:uppercase;margin-bottom:10px">Today's Progress</div>
+      <div style="position:relative;display:inline-block;margin-bottom:10px">
+        <svg width="100" height="100" style="transform:rotate(-90deg)">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#C97B5A" stroke-width="8"
+            stroke-dasharray="${2*Math.PI*40}"
+            stroke-dashoffset="${2*Math.PI*40*(1-pct/100)}"
+            stroke-linecap="round"/>
+        </svg>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:bold;color:#FDF6F0">${pct}%</div>
+      </div>
+      <div style="font-size:13px;color:#C4A882">${done} of ${total} completed</div>
+      ${streak>0?`<div style="margin-top:8px;font-size:12px;color:#E8C9A0">🔥 ${streak} day streak!</div>`:''}
+    </div>
+
+    ${sections.map(s=>{
+      const items=CHECKLIST_ITEMS[s.key];
+      const sectionDone=items.filter(i=>checks[i.id]).length;
+      return`<div style="background:${s.color};border-radius:16px;padding:14px;margin-bottom:10px;border:1px solid ${s.border}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:bold;color:${s.dot}">${s.label}</div>
+          <div style="font-size:11px;color:${s.dot};font-weight:bold">${sectionDone}/${items.length}</div>
+        </div>
+        ${items.map(item=>{
+          const checked=checks[item.id];
+          return`<div onclick="toggleCheck('${item.id}')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid ${s.border};cursor:pointer">
+            <div style="width:22px;height:22px;border-radius:6px;border:2px solid ${checked?s.dot:s.border};background:${checked?s.dot:'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s">
+              ${checked?'<span style="color:#FFF;font-size:13px;font-weight:bold">✓</span>':''}
+            </div>
+            <div style="font-size:13px;color:${checked?s.dot:'#2D2D2D'};${checked?'text-decoration:line-through;opacity:0.6':''}">
+              ${item.icon} ${item.text}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('')}
+
+    <div style="background:#3D2B1F;border-radius:14px;padding:14px;text-align:center;color:#FFF;margin-top:4px">
+      <div style="font-size:12px;color:#E8C9A0;margin-bottom:4px">💛 Every check = one step closer</div>
+      <div style="font-size:11px;color:#C4A882">Resets automatically every day at midnight</div>
+    </div>
+  </div>`;
 }
 
 render();
